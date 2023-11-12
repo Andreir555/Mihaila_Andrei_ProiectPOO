@@ -382,12 +382,6 @@ public:
 		cout << "\nTip bijuterie: "; input >> bijuterie.tipBijuterie;
 		cout << "Tematica: "; input >> bijuterie.tematica;
 		cout << "Nr materiale: "; input >> bijuterie.nrMateriale;
-		if (bijuterie.denumireMateriale)
-		{
-			for (int i = 0; i < bijuterie.nrMateriale; i++)
-				delete[]bijuterie.denumireMateriale[i];
-			delete[]bijuterie.denumireMateriale;
-		}
 		bijuterie.denumireMateriale = new char* [bijuterie.nrMateriale];
 		for (int i = 0; i < bijuterie.nrMateriale; i++)
 		{
@@ -456,6 +450,18 @@ void afisareClasaAngajat()
 	Testare++;
 	++Testare;
 	cout << Testare;
+	Angajat* npc;
+	int nr; cout << "Cate npc-uri?: "; cin >> nr;
+	npc = new Angajat[nr];
+	for (int i = 0; i < nr; i++)
+	{
+		npc[i] = (++Testare);
+	}
+	for (int i = 0; i < nr; i++)
+	{
+		cout << npc[i];
+	}
+
 
 }
 void afisareClasaMoneda()
@@ -472,14 +478,36 @@ void afisareClasaMoneda()
 		//cinciZeciBani.getValuta() << endl;
 	//cinciZeciBani.setForma("Tetrahexagonala");
 	//cout << cinciZeciBani.getForma();
-	cin >> cinciBani;
+	/*cin >> cinciBani;
 	cinciBani.afisare();
 	cinciBani += 10.0;
 	cinciBani.afisare();
 	cinciBani += cinciBani;
 	cinciBani.afisare();
 	if (cinciBani > zeceBani) cout << "\nESTE MAI MARE\n";
-	else cout << "\nNU ESTE MAI MARE\n";
+	else cout << "\nNU ESTE MAI MARE\n";*/
+
+	Moneda* xBani;
+	cout << "Cati bani?: ";
+	int bani; cin >> bani;
+	xBani = new Moneda[bani];
+	for (int i = 0; i < bani; i++)
+		cin >> xBani[i];
+	for (int i = 0; i < bani; i++)
+		xBani[i].afisare();
+	Moneda** matritaDeBani;
+	matritaDeBani = new Moneda * [2];
+	for (int i = 0; i < 2; i++)
+	{
+		matritaDeBani[i] = new Moneda[2];
+		for (int j = 0; j < 2; j++)
+			cin >> matritaDeBani[i][j];
+	}
+	for (int i = 0; i < 2; i++)
+	{
+		for (int j = 0; j < 2; j++)
+			matritaDeBani[i][j].afisare();
+	}
 
 }
 void afisareClasaBijuterie()
@@ -523,10 +551,20 @@ void afisareClasaBijuterie()
 	for (int i = 0; i < testareNrMateriale1; i++)
 		cout << testare1[i] << endl;
 
-	Bijuterie test;
+	/*Bijuterie test;
 	cin >> test;
 	cout << test;
-	cout << (test != verigheta);
+	cout << (test != verigheta);*/
+
+	Bijuterie* bijuterie;
+	cout << "\nCate bijuterii trebuie citite?: ";
+	int nrBijuterii;
+	cin >> nrBijuterii;
+	bijuterie = new Bijuterie[nrBijuterii];
+	for (int i = 0; i < nrBijuterii; i++)
+		cin >> bijuterie[i];
+	for (int i = 0; i < nrBijuterii; i++)
+		cout << bijuterie[i];
 }
 
 int main()

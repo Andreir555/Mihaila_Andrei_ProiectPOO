@@ -1,4 +1,5 @@
 #include <iostream>
+#include <fstream>
 
 using namespace std;
 
@@ -73,6 +74,12 @@ public:
 	friend ostream& operator<<(ostream& out, Angajat angajat)
 	{
 		angajat.afisare();
+		return out;
+	}
+	friend ofstream& operator<<(ofstream& out, Angajat angajat)
+	{
+		out << angajat.nume << "\n" << angajat.salariu
+			<< "\n" << impozitSalariu << "\n" << angajat.CNP << "\n";
 		return out;
 	}
 	//Functii prietene
@@ -220,11 +227,27 @@ public:
 
 		return input;
 	}
+	friend ifstream& operator>>(ifstream& input, Moneda& moneda) {
+		if (moneda.forma) delete[]moneda.forma;
+		moneda.forma = new char[10];
+		input >> moneda.forma;
+		 input >> moneda.valoare;
+		 input >> moneda.valuta;
+
+		return input;
+	}
 	friend ostream& operator<<(ostream& out, Moneda& moneda) {
 		out << "Forma: ";
 		out << moneda.forma;
 		cout << "Valoare: "; out << moneda.valoare;
 		cout << "Valuta: "; out << moneda.valuta;
+
+		return out;
+	}
+	friend ofstream& operator<<(ofstream& out, Moneda& moneda) {
+		out << moneda.forma << endl;
+		out << moneda.valoare << endl;
+		out << moneda.valuta << endl;
 
 		return out;
 	}
@@ -407,19 +430,48 @@ public:
 		cout << "TVA: "; input >> bijuterie.TVA;
 		return input;
 	}
+	friend ifstream& operator>>(ifstream& input, Bijuterie& bijuterie)
+	{
+
+		input >> bijuterie.tipBijuterie;
+		input >> bijuterie.tematica;
+		input >> bijuterie.nrMateriale;
+		bijuterie.denumireMateriale = new char* [bijuterie.nrMateriale];
+		for (int i = 0; i < bijuterie.nrMateriale; i++)
+		{
+			bijuterie.denumireMateriale[i] = new char[20];
+			input >> bijuterie.denumireMateriale[i];
+		}
+		input >> bijuterie.TVA;
+		return input;
+	}
 	friend ostream& operator<<(ostream& out, Bijuterie& bijuterie)
 	{
-		cout << "Tipul Bijuteriei este: " << bijuterie.tipBijuterie << "\nTematica Bijuteriei este: " << bijuterie.tematica <<
+		out << "Tipul Bijuteriei este: " << bijuterie.tipBijuterie << "\nTematica Bijuteriei este: " << bijuterie.tematica <<
 			"\nAnul Confectionarii a fost: " << bijuterie.anConfectionare << "\nTVA-ul este de: " << TVA;
 		if (bijuterie.nrMateriale != 0)
 		{
-			cout << "\nNr materiale folosite: " <<
+			out << "\nNr materiale folosite: " <<
 				bijuterie.nrMateriale << "\nMaterialele folosite sunt: ";
 			for (int i = 0; i < bijuterie.nrMateriale; i++)
-				cout << bijuterie.denumireMateriale[i] << " ";
+				out << bijuterie.denumireMateriale[i] << " ";
 		}
-		else cout << "\nNu exista materiale folosite!";
-		cout << "\n\n";
+		else out << "\nNu exista materiale folosite!";
+		out << "\n\n";
+		return out;
+	}
+	friend ofstream& operator<<(ofstream& out, Bijuterie& bijuterie)
+	{
+		cout << bijuterie.tipBijuterie << endl << bijuterie.tematica <<
+			endl << bijuterie.anConfectionare << endl << TVA;
+		if (bijuterie.nrMateriale != 0)
+		{
+			cout << endl <<
+				bijuterie.nrMateriale << endl;
+			for (int i = 0; i < bijuterie.nrMateriale; i++)
+				cout << bijuterie.denumireMateriale[i] << endl;
+		}
+		cout << "\n";
 		return out;
 	}
 	bool operator!=(Bijuterie bijuterie)
@@ -465,9 +517,25 @@ public:
 			input >> seif.monede[i];
 		return input;
 	}
+	friend ifstream& operator>>(ifstream& input, Seif& seif)
+	{
+		input >> seif.denumireSeif >> seif.nrMonede;
+		if (seif.monede) delete[]seif.monede;
+		seif.monede = new Moneda[seif.nrMonede];
+		for (int i = 0; i < seif.nrMonede; i++)
+			input >> seif.monede[i];
+		return input;
+	}
 	friend ostream& operator<<(ostream& out, Seif& seif)
 	{
-		out << seif.denumireSeif << " " << seif.nrMonede << endl;
+		out << seif.denumireSeif << endl << seif.nrMonede << endl;
+		for (int i = 0; i < seif.nrMonede; i++)
+			out << seif.monede[i] << endl;
+		return out;
+	}
+	friend ofstream& operator<<(ofstream& out, Seif& seif)
+	{
+		out << seif.denumireSeif << endl << seif.nrMonede << endl;
 		for (int i = 0; i < seif.nrMonede; i++)
 			out << seif.monede[i] << endl;
 		return out;
@@ -653,7 +721,39 @@ int main()
 	//afisareClasaAngajat();
 	//afisareClasaMoneda();
 	//afisareClasaBijuterie();
-	Seif s;
+	fstream finSeif("Seif.txt", ios::in);
+	fstream foutSeif("Seif.txt", ios::out);
+	/*Seif s;
 	cin >> s;
 	cout << s;
+	foutSeif << s;
+	Seif s2;
+	finSeif >> s2;
+	cout << s2;
+	fstream finBijuterie("Bijuterie.txt", ios::in);
+	fstream foutBijuterie("Bijuterie.txt", ios::out);
+	Bijuterie b1, b2;
+	cin >> b1;
+	foutBijuterie << b1;*/
+	fstream fisierBinarMoneda("Moneda.moneda", ios::binary | ios::out);
+	Moneda m;
+	//forma valoare material valuta
+	int lungime = strlen(m.getForma());
+	float valoare = m.getValoare();
+	fisierBinarMoneda.write((char*)m.getForma(), (sizeof(char) * lungime + 1));
+	fisierBinarMoneda.write((char*)&m.getMaterial(), (m.getMaterial().length() + 1));
+	fisierBinarMoneda.write((char*)&valoare, sizeof(float));
+	fisierBinarMoneda.write((char*)&m.getValuta(), (m.getValuta().length() + 1));
+	fstream fisierBinarAngajat("Angajat.angajat", ios::binary | ios::out);
+	Angajat a;
+	/*char* nume;
+	int salariu;
+	static float impozitSalariu;
+	const string CNP;*/
+	int salariu = a.getSalariu();
+	float impozit = a.getImpozit();
+	fisierBinarAngajat.write((char*)a.getNume(), (strlen(a.getNume() + 1)));
+	fisierBinarAngajat.write((char*)&salariu, sizeof(int));
+	fisierBinarAngajat.write((char*)&impozit, sizeof(float));
+	fisierBinarAngajat.write((char*)&a.getCNP(), (a.getCNP().length() + 1));
 }

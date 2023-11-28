@@ -160,7 +160,15 @@ public:
 		this->valoare = moneda.valoare;
 
 	}
-
+	void operator=(const Moneda& moneda)
+	{
+		if (this != &moneda)
+		{
+			this->forma = new char[strlen(moneda.forma) + 1];
+			strcpy_s(this->forma, strlen(moneda.forma) + 1, moneda.forma);
+			this->valoare = moneda.valoare;
+		}
+	}
 	~Moneda()
 	{
 		if (this->forma != NULL)
@@ -211,6 +219,14 @@ public:
 		cout << "Valuta: "; input >> moneda.valuta;
 
 		return input;
+	}
+	friend ostream& operator<<(ostream& out, Moneda& moneda) {
+		out << "Forma: ";
+		out << moneda.forma;
+		cout << "Valoare: "; out << moneda.valoare;
+		cout << "Valuta: "; out << moneda.valuta;
+
+		return out;
 	}
 	Moneda& operator+=(Moneda& moneda)
 	{
@@ -415,6 +431,71 @@ public:
 };
 float Bijuterie::TVA = 0.19;
 
+class Seif {
+private:
+	Moneda* monede;
+	string denumireSeif;
+	int nrMonede;
+public:
+	Seif()
+	{
+		this->nrMonede = 1;
+		this->denumireSeif = "Seif Default";
+		this->monede = new Moneda[this->nrMonede];
+	}
+	Seif(const Seif& seif)
+	{
+		this->nrMonede = seif.nrMonede;
+		this->denumireSeif = seif.denumireSeif;
+		this->monede = new Moneda[this->nrMonede];
+	}
+	void operator=(const Seif& seif) {
+		if (this != &seif) {
+			this->nrMonede = seif.nrMonede;
+			this->denumireSeif = seif.denumireSeif;
+			this->monede = new Moneda[this->nrMonede];
+		}
+	}
+	friend istream& operator>>(istream& input, Seif& seif)
+	{
+		input >> seif.denumireSeif >> seif.nrMonede;
+		if (seif.monede) delete[]seif.monede;
+		seif.monede = new Moneda[seif.nrMonede];
+		for (int i = 0; i < seif.nrMonede; i++)
+			input >> seif.monede[i];
+		return input;
+	}
+	friend ostream& operator<<(ostream& out, Seif& seif)
+	{
+		out << seif.denumireSeif << " " << seif.nrMonede << endl;
+		for (int i = 0; i < seif.nrMonede; i++)
+			out << seif.monede[i] << endl;
+		return out;
+	}
+	int getNrMonede() {
+		return this->nrMonede;
+	}
+	string getDenumire() {
+		return this->denumireSeif;
+	}
+	Moneda* getMonede() {
+		return this->monede;
+	}
+	void setMonede(int nrMonede, const Moneda* monede) {
+		if (this->monede) delete[]this->monede;
+		this->nrMonede = nrMonede;
+		this->monede = new Moneda[this->nrMonede];
+		for (int i = 0; i < this->nrMonede; i++)
+			this->monede[i] = monede[i];
+	}
+	~Seif()
+	{
+		if (this->monede)
+			delete[]this->monede;
+	}
+
+};
+
 void afisareImpozitDinSalariu(Angajat x)
 {
 	cout << "\n\n\n\n" << x.salariu * x.impozitSalariu;
@@ -569,7 +650,10 @@ void afisareClasaBijuterie()
 
 int main()
 {
-	afisareClasaAngajat();
-	afisareClasaMoneda();
-	afisareClasaBijuterie();
+	//afisareClasaAngajat();
+	//afisareClasaMoneda();
+	//afisareClasaBijuterie();
+	Seif s;
+	cin >> s;
+	cout << s;
 }

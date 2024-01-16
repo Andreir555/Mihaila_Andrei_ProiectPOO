@@ -1,19 +1,34 @@
 #include <iostream>
 #include <fstream>
-
+#include <queue>
 using namespace std;
 
 //Nume: Mihaila Andrei
 //Domeniu: Monetarie
 //Clase: Angajat, Moneda, Bijuterie
 
-class Angajat {
+class Om {
+private:
+	float inaltime;
+public:
+	Om() {
+		inaltime = 1.80;
+	}
+	virtual float getImpozitDinSalariu() = 0;
+};
+
+class Angajat : public Om{
 private:
 	char* nume;
 	int salariu;
 	static float impozitSalariu;
 	const string CNP;
 public:
+
+	virtual float getImpozitDinSalariu() {
+		return this->salariu * this->impozitSalariu;
+	}
+
 	Angajat() : CNP("Undefined") //Valori default
 	{
 		this->nume = new char[strlen("Undefined") + 1];
@@ -43,13 +58,14 @@ public:
 		this->salariu = angajat.salariu;
 	}
 
-	void operator=(const Angajat& angajat) {
+	Angajat& operator=(const Angajat& angajat) {
 		if (this != &angajat) {
 			if (this->nume != NULL) delete[]this->nume;
 			this->nume = new char[strlen(angajat.nume) + 1];
 			strcpy_s(this->nume, strlen(angajat.nume) + 1, angajat.nume);
 			this->salariu = angajat.salariu;
 		}
+		return *this;
 	}
 	Angajat operator+(const Angajat& angajat)
 	{
@@ -69,7 +85,7 @@ public:
 	{
 		cout << "Numele angajatului: " << nume << "\nSalariul angajatului: " << salariu
 			<< "\nImpozitul pe salariu este: " << impozitSalariu << "\nCNP-ul angajatului este: " << CNP <<
-			"\nSalariul dupa impozitare este: " << salariu * (1 - impozitSalariu) << "\n\n";
+			"\nSalariul dupa impozitare este: " << salariu * (1 - impozitSalariu) << "\n";
 	}
 	friend ostream& operator<<(ostream& out, Angajat angajat)
 	{
@@ -130,12 +146,79 @@ public:
 };
 float Angajat::impozitSalariu = 0.45;
 
-class Moneda {
+class Trainer : public Angajat {
+private:
+	int nrOameniInSubordonare;
+public:
+	Trainer() : Angajat() {
+		this->nrOameniInSubordonare = 0;
+	}
+	Trainer(const char* numeTrainer, int salariu, string CNP, int nrOameniSubordonati) :
+		Angajat(numeTrainer, salariu, CNP) {
+		this->nrOameniInSubordonare = nrOameniSubordonati;
+	}
+	Trainer(const Trainer& trainer) : Angajat(trainer){
+		this->nrOameniInSubordonare = trainer.nrOameniInSubordonare;
+	}
+
+	Trainer& operator=(const Trainer& trainer) {
+		if (this != &trainer) {
+			Angajat::operator+(trainer);
+			this->nrOameniInSubordonare = trainer.nrOameniInSubordonare;
+		}
+		return *this;
+	}
+
+	Trainer operator+(const Trainer& trainer)
+	{
+		Angajat::operator+(trainer);
+		return (*this);
+	}
+	Trainer operator++() {
+		Angajat::operator++();
+		return(*this);
+	}
+	Trainer operator++(int) {
+		Trainer temp = (*this);
+		Angajat::operator++();
+		return temp;
+	}
+	friend ostream& operator<<(ostream& out, Trainer trainer)
+	{
+		out << (Angajat)trainer;
+		out << "Nr oameni in subordonare: " << trainer.nrOameniInSubordonare;
+		return out;
+	}
+	friend ofstream& operator<<(ofstream& out, Trainer trainer)
+	{
+		out << (Angajat)trainer;
+		out << trainer.nrOameniInSubordonare;
+		return out;
+	}
+};
+
+class Importate {
+private:
+	string initiale;
+public:
+	Importate()
+	{
+		this->initiale = "XX";
+	}
+	virtual string afisareInitiale() = 0;
+
+};
+
+class Moneda : public Importate {
 public:
 	char* forma;
 	float valoare;
 	const string material;
 	static string valuta;
+
+	virtual string afisareInitiale() {
+		return "MONEDA LOCALA";
+	}
 
 	Moneda() : material("Aer") //Nu exista o moneda introdusa
 	{
@@ -167,7 +250,7 @@ public:
 		this->valoare = moneda.valoare;
 
 	}
-	void operator=(const Moneda& moneda)
+	Moneda& operator=(const Moneda& moneda)
 	{
 		if (this != &moneda)
 		{
@@ -175,6 +258,7 @@ public:
 			strcpy_s(this->forma, strlen(moneda.forma) + 1, moneda.forma);
 			this->valoare = moneda.valoare;
 		}
+		return *this;
 	}
 	~Moneda()
 	{
@@ -237,10 +321,9 @@ public:
 		return input;
 	}
 	friend ostream& operator<<(ostream& out, Moneda& moneda) {
-		out << "Forma: ";
-		out << moneda.forma;
-		cout << "Valoare: "; out << moneda.valoare;
-		cout << "Valuta: "; out << moneda.valuta;
+		out << "Forma: " << moneda.forma << endl;
+		out << "Valoare: "; out << moneda.valoare << endl;
+		out << "Valuta: "; out << moneda.valuta << endl;
 
 		return out;
 	}
@@ -266,11 +349,105 @@ public:
 		if (this->valoare > moneda.valoare) return true;
 		return false;
 	}
+	operator int()
+	{
+		return this->valoare;
+	}
+	operator string()
+	{
+		return this->valuta;
+	}
+
 
 };
 string Moneda::valuta = "RON";
 
-class Bijuterie {
+class MonedaStraina : public Moneda{
+public:
+	string taraMoneda;
+
+	virtual string afisareInitiale() {
+		return this->taraMoneda.substr(0, 2);
+	}
+
+	MonedaStraina() : Moneda()
+	{
+		this->taraMoneda = "Undefined";
+	}
+
+	MonedaStraina(const char* formaNoua, float valoareNoua, string materialNou, string taraMoneda) : Moneda(formaNoua, valoareNoua, materialNou) 
+	{
+		this->taraMoneda = taraMoneda;
+
+	}
+
+	MonedaStraina(const MonedaStraina& monedaStraina) : Moneda(monedaStraina)
+	{
+		this->taraMoneda = monedaStraina.taraMoneda;
+
+	}
+	void setTara(string taraMoneda) {
+		this->taraMoneda=taraMoneda;
+	}
+	string getTara() {
+		return this->taraMoneda;
+	}
+
+	MonedaStraina& operator=(const MonedaStraina& monedaStraina)
+	{
+		if (this != &monedaStraina)
+		{
+			Moneda::operator=(monedaStraina);
+			this->taraMoneda = monedaStraina.taraMoneda;
+		}
+		return *this;
+	}
+
+	friend istream& operator>>(istream& input, MonedaStraina& monedaStraina) {
+		input >> (Moneda&)monedaStraina;
+		cout << "Tara de provenienta: ";
+		input >> monedaStraina.taraMoneda;
+		return input;
+	}
+	friend ifstream& operator>>(ifstream& input, MonedaStraina& monedaStraina) {
+		input >> (Moneda&)monedaStraina;
+		input >> monedaStraina.taraMoneda;
+		return input;
+	}
+	friend ostream& operator<<(ostream& out, MonedaStraina& monedaStraina) {
+		out << (Moneda&)monedaStraina;
+		out << "Tara de provenienta a monedei: " << monedaStraina.taraMoneda << endl;
+		return out;
+	}
+	friend ofstream& operator<<(ofstream& out, MonedaStraina& monedaStraina) {
+		out << (Moneda&)monedaStraina;
+		out << monedaStraina.taraMoneda << endl;
+		return out;
+	}
+	MonedaStraina& operator+=(MonedaStraina& monedaStraina)
+	{
+		Moneda::operator+=(monedaStraina);
+		return(*this);
+	}
+	bool operator>(MonedaStraina& monedaStraina)
+	{
+		if (*this > monedaStraina) return true;
+		return false;
+	}
+	static void setValuta(string valutaNoua) {
+		Moneda::setValuta(valutaNoua);
+	};
+	operator int()
+	{
+		return this->valoare;
+	}
+	operator string()
+	{
+		return this->valuta;
+	}
+};
+
+class Bijuterie : public Importate{
 public:
 	string tipBijuterie;
 	string tematica;
@@ -278,6 +455,11 @@ public:
 	char** denumireMateriale;
 	const int anConfectionare;
 	static float TVA;
+
+	virtual string afisareInitiale()
+	{
+		return (tipBijuterie.substr(0, 3) + tematica.substr(0, 3));
+	}
 
 	Bijuterie() : anConfectionare(0) //Bijuterie inexistenta
 	{
@@ -359,7 +541,7 @@ public:
 	int getAnConfectionare() {
 		return this->anConfectionare;
 	}
-	int getTVA() {
+	float getTVA() {
 		return TVA;
 	}
 	void setTipBijuterie(string tipBijuterie) {
@@ -676,84 +858,144 @@ void afisareClasaBijuterie()
 	inel.afisare();
 	/*Bijuterie cercelObor("Cercel", "Copii", 2015);
 	cercelObor.afisare();*/
-	Bijuterie verigheta = inel;
-	cout << verigheta;
+Bijuterie verigheta = inel;
+cout << verigheta;
 
-	char** materiale1;
-	materiale1 = new char* [3];
-	materiale1[0] = new char[10];
-	materiale1[1] = new char[10];
-	materiale1[2] = new char[10];
-	strcpy_s(materiale1[0], strlen("Argint") + 1, "Argint");
-	strcpy_s(materiale1[1], strlen("Aur") + 1, "Aur");
-	strcpy_s(materiale1[2], strlen("Diamant") + 1, "Diamant");
+char** materiale1;
+materiale1 = new char* [3];
+materiale1[0] = new char[10];
+materiale1[1] = new char[10];
+materiale1[2] = new char[10];
+strcpy_s(materiale1[0], strlen("Argint") + 1, "Argint");
+strcpy_s(materiale1[1], strlen("Aur") + 1, "Aur");
+strcpy_s(materiale1[2], strlen("Diamant") + 1, "Diamant");
 
-	char** testare = verigheta.getDenumireMateriale();
-	int testareNrMateriale = verigheta.getNrMateriale();
-	for (int i = 0; i < testareNrMateriale; i++)
-		cout << testare[i] << endl;
+char** testare = verigheta.getDenumireMateriale();
+int testareNrMateriale = verigheta.getNrMateriale();
+for (int i = 0; i < testareNrMateriale; i++)
+	cout << testare[i] << endl;
 
-	verigheta.setDenumireMateriale(3, materiale1);
+verigheta.setDenumireMateriale(3, materiale1);
 
-	char** testare1 = verigheta.getDenumireMateriale();
-	int testareNrMateriale1 = verigheta.getNrMateriale();
-	for (int i = 0; i < testareNrMateriale1; i++)
-		cout << testare1[i] << endl;
+char** testare1 = verigheta.getDenumireMateriale();
+int testareNrMateriale1 = verigheta.getNrMateriale();
+for (int i = 0; i < testareNrMateriale1; i++)
+	cout << testare1[i] << endl;
 
-	/*Bijuterie test;
-	cin >> test;
-	cout << test;
-	cout << (test != verigheta);*/
+/*Bijuterie test;
+cin >> test;
+cout << test;
+cout << (test != verigheta);*/
 
-	Bijuterie* bijuterie;
-	cout << "\nCate bijuterii trebuie citite?: ";
-	int nrBijuterii;
-	cin >> nrBijuterii;
-	bijuterie = new Bijuterie[nrBijuterii];
-	for (int i = 0; i < nrBijuterii; i++)
-		cin >> bijuterie[i];
-	for (int i = 0; i < nrBijuterii; i++)
-		cout << bijuterie[i];
+Bijuterie* bijuterie;
+cout << "\nCate bijuterii trebuie citite?: ";
+int nrBijuterii;
+cin >> nrBijuterii;
+bijuterie = new Bijuterie[nrBijuterii];
+for (int i = 0; i < nrBijuterii; i++)
+	cin >> bijuterie[i];
+for (int i = 0; i < nrBijuterii; i++)
+	cout << bijuterie[i];
+}
+
+template<class T>
+class Muzeu {
+private:
+	int nrExponate;
+	T* exponate;
+public:
+	Muzeu() {
+		this->nrExponate = 5;
+		this->exponate = new T[nrExponate];
+	}
+	int getNrElemente() {
+		return this->nrExponate;
+	}
+	~Muzeu() {
+		if (exponate != NULL) {
+			delete[]exponate;
+		}
+	}
+	Muzeu(const Muzeu& c) {
+		this->nrExponate = c.nrExponate;
+		this->exponate = new T[c.nrExponate];
+		for (int i = 0; i < c.nrExponate; i++) {
+			this->exponate[i] = c.exponate[i];
+		}
+	}
+	Muzeu operator=(const Muzeu& c) {
+		if (this != &c) {
+			this->nrExponate = c.nrExponate;
+			if (this->exponate != NULL)
+				delete[]this->exponate;
+			this->exponate = new T[c.nrExponate];
+			for (int i = 0; i < c.nrExponate; i++) {
+				this->exponate[i] = c.exponate[i];
+			}
+		}
+		return *this;
+	}
+
+	T& operator[](int index) {
+		if (index >= 0 && index < this->nrExponate) {
+			return this->exponate[index];
+		}
+	}
+};
+
+template<class T>
+void initializareMuzeuMonede(T& muzeu)
+{
+	MonedaStraina moneda1("Rotunda", 5.0, "Aliaj", "SUA");
+	MonedaStraina moneda2("Patrata", 2.5, "Argint", "Franta");
+	MonedaStraina moneda3("Hexagonala", 10.0, "Otel", "Germania");
+	MonedaStraina moneda4("Ovala", 7.2, "Bronz", "Italia");
+	MonedaStraina moneda5("Triunghiulara", 3.8, "Cupru", "Spania");
+	muzeu[0] = moneda1;
+	muzeu[1] = moneda2;
+	muzeu[2] = moneda3;
+	muzeu[3] = moneda4;
+	muzeu[4] = moneda5;
+}
+
+void afisareCoada(priority_queue<pair<int, string>> coada){
+	while (!coada.empty()) {
+		cout << coada.top().first << " ";
+		cout << coada.top().second << endl;
+		coada.pop();
+	}
+	cout << endl;
 }
 
 int main()
 {
-	//afisareClasaAngajat();
-	//afisareClasaMoneda();
-	//afisareClasaBijuterie();
-	fstream finSeif("Seif.txt", ios::in);
-	fstream foutSeif("Seif.txt", ios::out);
-	/*Seif s;
-	cin >> s;
-	cout << s;
-	foutSeif << s;
-	Seif s2;
-	finSeif >> s2;
-	cout << s2;
-	fstream finBijuterie("Bijuterie.txt", ios::in);
-	fstream foutBijuterie("Bijuterie.txt", ios::out);
-	Bijuterie b1, b2;
-	cin >> b1;
-	foutBijuterie << b1;*/
-	fstream fisierBinarMoneda("Moneda.moneda", ios::binary | ios::out);
-	Moneda m;
-	//forma valoare material valuta
-	int lungime = strlen(m.getForma());
-	float valoare = m.getValoare();
-	fisierBinarMoneda.write((char*)m.getForma(), (sizeof(char) * lungime + 1));
-	fisierBinarMoneda.write((char*)&m.getMaterial(), (m.getMaterial().length() + 1));
-	fisierBinarMoneda.write((char*)&valoare, sizeof(float));
-	fisierBinarMoneda.write((char*)&m.getValuta(), (m.getValuta().length() + 1));
-	fstream fisierBinarAngajat("Angajat.angajat", ios::binary | ios::out);
-	Angajat a;
-	/*char* nume;
-	int salariu;
-	static float impozitSalariu;
-	const string CNP;*/
-	int salariu = a.getSalariu();
-	float impozit = a.getImpozit();
-	fisierBinarAngajat.write((char*)a.getNume(), (strlen(a.getNume() + 1)));
-	fisierBinarAngajat.write((char*)&salariu, sizeof(int));
-	fisierBinarAngajat.write((char*)&impozit, sizeof(float));
-	fisierBinarAngajat.write((char*)&a.getCNP(), (a.getCNP().length() + 1));
+	Bijuterie b;
+	cin >> b;
+	cout << b << endl;
+
+	ofstream fout("fisier.txt", ios::out);
+	MonedaStraina ms;
+	cin >> ms;
+	fout << ms;
+	cout << ms << endl;
+
+	Moneda m1;
+
+	Importate* i[] = {&ms, &m1, &b};
+	cout << i[0]->afisareInitiale() << endl << i[1]->afisareInitiale() << endl << i[2]->afisareInitiale() << "\n\n";
+
+	priority_queue<pair<int, string>> monedeValoareSortate;
+	
+	Muzeu<MonedaStraina> muzeuMonede;
+
+	initializareMuzeuMonede(muzeuMonede);
+	for (int i = 0; i < 5; i++)
+	{
+		cout << muzeuMonede[i] << endl;
+		monedeValoareSortate.push(make_pair((int)muzeuMonede[i], (string)muzeuMonede[i]));
+	}
+	afisareCoada(monedeValoareSortate);
+	
+	
+
 }

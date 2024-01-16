@@ -6,6 +6,10 @@ using namespace std;
 //Nume: Mihaila Andrei
 //Domeniu: Monetarie
 //Clase: Angajat, Moneda, Bijuterie
+//Clase abstracte: Importate, Om
+//Clase derivate (is-a): Trainer, MonedaStraina
+//Clase derivate (has-a): Seif
+//Clase template: Muzeu
 
 class Om {
 private:
